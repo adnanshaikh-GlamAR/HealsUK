@@ -1777,11 +1777,12 @@ const CATALOG_IMAGE_SETS = {
     'Leather Grain': [1, 2, 3, 4, 5].map((imageNumber) => {
       const index = String(imageNumber).padStart(2, '0');
       const base = `assets/matera/leather-grain/${index}`;
+      const version = '?v=matera-leather-20260521';
       return {
-        src: `${base}-960.webp`,
-        srcset: `${base}-960.webp 960w, ${base}-1536.webp 1536w`,
+        src: `${base}-960.webp${version}`,
+        srcset: `${base}-960.webp${version} 960w, ${base}-1536.webp${version} 1536w`,
         sizes: '(max-width: 960px) calc(100vw - 40px), 760px',
-        thumb: `${base}-thumb.webp`,
+        thumb: `${base}-thumb.webp${version}`,
         alt: `Matera sofa in Leather Grain, view ${imageNumber}`,
       };
     }),
