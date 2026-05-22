@@ -1143,6 +1143,96 @@
     color: var(--ink-muted);
   }
 
+  .video-ad {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: min(240px, calc(100vw - 32px));
+    z-index: 130;
+    filter: drop-shadow(0 18px 34px rgba(17, 28, 47, 0.24));
+  }
+  .video-ad[hidden] { display: none; }
+  .video-ad-trigger {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,0.48);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #111;
+    cursor: pointer;
+    display: block;
+  }
+  .video-ad-trigger video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .video-ad-icon {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(250, 248, 244, 0.88);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-ad-icon svg { width: 18px; height: 18px; }
+  .video-ad-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 320;
+    display: none;
+    background: rgba(17, 17, 17, 0.96);
+    align-items: center;
+    justify-content: center;
+    padding: 58px 72px;
+    animation: fadeIn 0.24s ease;
+  }
+  .video-ad-fullscreen.active { display: flex; }
+  .video-ad-fullscreen video {
+    width: 100%;
+    height: 100%;
+    max-width: 1440px;
+    max-height: calc(100vh - 116px);
+    object-fit: contain;
+    background: #000;
+    border-radius: 4px;
+    animation: videoAdZoom 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes videoAdZoom {
+    from { opacity: 0; transform: translate(12vw, 12vh) scale(0.32); }
+    to { opacity: 1; transform: translate(0, 0) scale(1); }
+  }
+  .video-ad-close {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.34);
+    background: rgba(250, 248, 244, 0.12);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .video-ad-close:hover {
+    background: rgba(250, 248, 244, 0.2);
+    border-color: rgba(255,255,255,0.66);
+    transform: scale(1.04);
+  }
+  .video-ad-close svg { width: 20px; height: 20px; }
+
   /* ---------- Responsive ---------- */
   @media (max-width: 960px) {
     .nav-inner { padding: 16px 20px; }
@@ -1155,6 +1245,7 @@
     .specs-strip { grid-template-columns: 1fr 1fr; padding: 40px 20px; }
     .viewer-foot { grid-template-columns: 1fr; gap: 16px; }
     .catalog-fullscreen-stage { inset: 72px 64px 64px; }
+    .video-ad { width: min(210px, calc(100vw - 32px)); }
   }
   @media (max-width: 560px) {
     .fabric-group { padding: 14px 14px 18px; }
@@ -1188,6 +1279,25 @@
     .catalog-fullscreen-spin-label {
       top: 22px;
       left: 16px;
+    }
+    .video-ad {
+      right: 12px;
+      bottom: 12px;
+      width: min(180px, calc(100vw - 24px));
+    }
+    .video-ad-icon {
+      right: 8px;
+      bottom: 8px;
+      width: 30px;
+      height: 30px;
+    }
+    .video-ad-fullscreen { padding: 70px 14px 26px; }
+    .video-ad-fullscreen video { max-height: calc(100vh - 96px); }
+    .video-ad-close {
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
     }
   }
 
@@ -1882,6 +1992,27 @@
   <p style="margin-top:18px; font-size:11px; color:var(--ink-muted);">© 2026 Heal &amp; Son Ltd. All rights reserved.</p>
 </footer>
 
+<!-- ============ FLOATING VIDEO AD ============ -->
+<div class="video-ad" id="video-ad">
+  <button class="video-ad-trigger" id="video-ad-open" type="button" aria-label="Open video advert fullscreen">
+    <video id="video-ad-preview" autoplay muted loop playsinline preload="metadata" disablepictureinpicture>
+      <source src="assets/video/heals-sample.mp4" type="video/mp4">
+    </video>
+    <span class="video-ad-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg>
+    </span>
+  </button>
+</div>
+
+<div class="video-ad-fullscreen" id="video-ad-fullscreen" aria-hidden="true">
+  <button class="video-ad-close" id="video-ad-close" type="button" aria-label="Close video advert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <video id="video-ad-player" controls playsinline preload="metadata">
+    <source src="assets/video/heals-sample.mp4" type="video/mp4">
+  </video>
+</div>
+
 
 <script>
 /* ====================================================== *
@@ -2220,6 +2351,66 @@ document.addEventListener('keydown', e => {
     showCatalogFullscreenItem(catalogFullscreenIndex + 1);
   }
 });
+
+const videoAd = document.getElementById('video-ad');
+const videoAdOpen = document.getElementById('video-ad-open');
+const videoAdPreview = document.getElementById('video-ad-preview');
+const videoAdFullscreen = document.getElementById('video-ad-fullscreen');
+const videoAdPlayer = document.getElementById('video-ad-player');
+const videoAdClose = document.getElementById('video-ad-close');
+
+function playVideoAd(video) {
+  if (!video) return;
+  const playAttempt = video.play();
+  if (playAttempt?.catch) playAttempt.catch(() => {});
+}
+
+function openVideoAdFullscreen() {
+  if (!videoAdFullscreen || !videoAdPlayer) return;
+  const startTime = Number.isFinite(videoAdPreview?.currentTime) ? videoAdPreview.currentTime : 0;
+  videoAdFullscreen.classList.add('active');
+  videoAdFullscreen.setAttribute('aria-hidden', 'false');
+  if (videoAd) videoAd.hidden = true;
+  document.body.style.overflow = 'hidden';
+  try {
+    videoAdPlayer.currentTime = Math.min(startTime, videoAdPlayer.duration || startTime);
+  } catch {}
+  videoAdPlayer.muted = false;
+  videoAdPlayer.loop = false;
+  playVideoAd(videoAdPlayer);
+  videoAdPreview?.pause();
+  videoAdClose?.focus({ preventScroll: true });
+}
+
+function closeVideoAdFullscreen() {
+  if (!videoAdFullscreen?.classList.contains('active')) return;
+  videoAdFullscreen.classList.remove('active');
+  videoAdFullscreen.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (videoAd) videoAd.hidden = false;
+  videoAdPlayer?.pause();
+  if (videoAdPreview && videoAdPlayer) {
+    try {
+      videoAdPreview.currentTime = Math.min(videoAdPlayer.currentTime || 0, videoAdPreview.duration || 0);
+    } catch {}
+  }
+  playVideoAd(videoAdPreview);
+}
+
+videoAdOpen?.addEventListener('click', openVideoAdFullscreen);
+videoAdClose?.addEventListener('click', closeVideoAdFullscreen);
+videoAdFullscreen?.addEventListener('click', e => {
+  if (e.target === videoAdFullscreen) closeVideoAdFullscreen();
+});
+videoAdPlayer?.addEventListener('ended', closeVideoAdFullscreen);
+videoAdPreview?.addEventListener('canplay', () => playVideoAd(videoAdPreview), { once: true });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && videoAdFullscreen?.classList.contains('active')) {
+    e.preventDefault();
+    closeVideoAdFullscreen();
+  }
+});
+playVideoAd(videoAdPreview);
 
 function updateCatalogImages(pageKey = STATE.currentDetailPage, fabricName = STATE.fabricName) {
   if (!pageKey) return;
